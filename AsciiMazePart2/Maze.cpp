@@ -1,6 +1,7 @@
 #include "Maze.h"
 #include "Astar.h"
 #include "Path.h"
+#include "Player.h"
 #include <iostream>;
 #include <fstream>
 #include <vector>;
@@ -128,24 +129,24 @@ bool Maze::readMapFile(string file) {
     for (int x = 1; x < width; x++) {
         if (map[0][x] == 'E') {
             exits++;
-            addToExits(x, 0);
+            addToExits(x, 0, 0);
         }
 
         if (map[height - 1][x] == 'E') {
             exits++;
-            addToExits(x, height - 1);
+            addToExits(x, height - 1, 2);
         }
     }
 
     for (int x = 1; x < height; x++) {
         if (map[x][0] == 'E') {
             exits++;
-            addToExits(0, x);
+            addToExits(0, x, 3);
         }
 
         if (map[x][width - 1] == 'E') {
             exits++;
-            addToExits(width - 1, x);
+            addToExits(width - 1, x, 1);
         }
     }
 
@@ -160,7 +161,7 @@ void Maze::initaliseNewMaze() {
     width = userInput(10, 30);
     cout << "enter height (minimum 10, maximum: 30): ";
     height = userInput(10, 30);
-    cout << "enter number of exits (minimum 0, maximum: 10): ";
+    cout << "enter number of enterances (minimum 0, maximum: 10): ";
     exits = userInput(0, 10);
 
     vector<vector<char>> build(height, vector<char>(width, 'X'));
@@ -192,7 +193,11 @@ void Maze::initaliseNewMaze() {
 
     makeNewExits();
 
-    map[middleHeight][middleWidth] = 'S';
+    for (auto& i : players) {
+        map[i->y][i->x] = 'P';
+    }
+
+    map[middleHeight][middleWidth] = 'F';
 }
 
 void Maze::makeNewExits() {
@@ -204,13 +209,15 @@ void Maze::makeNewExits() {
         int locWidth = (rand() % (width - 2)) + 1;
         int locHeight = (rand() % (height - 2)) + 1;
 
-        switch (rand() % 4) { //choose wall: 0 = north, 1 = east, 2 = south, 3 = west
+        int card = rand() % 4;
+
+        switch (card) { //choose wall: 0 = north, 1 = east, 2 = south, 3 = west
         case 0:
 
             if (map[1][locWidth] == ' ' && map[0][locWidth] != 'E') {
                 map[0][locWidth] = 'E';
                 exitLoop++;
-                addToExits(locWidth, 0);
+                addToExits(locWidth, 0, card);
             }
             break;
 
@@ -219,7 +226,7 @@ void Maze::makeNewExits() {
             if (map[locHeight][width - 2] == ' ' && map[locHeight][width - 1] != 'E') {
                 map[locHeight][width - 1] = 'E';
                 exitLoop++;
-                addToExits(width - 1, locHeight);
+                addToExits(width - 1, locHeight, card);
             }
             break;
 
@@ -228,7 +235,7 @@ void Maze::makeNewExits() {
             if (map[height - 2][locWidth] == ' ' && map[height - 1][locWidth] != 'E') {
                 map[height - 1][locWidth] = 'E';
                 exitLoop++;
-                addToExits(locWidth, height - 1);
+                addToExits(locWidth, height - 1, card);
             }
             break;
 
@@ -237,18 +244,25 @@ void Maze::makeNewExits() {
             if (map[locHeight][1] == ' ' && map[locHeight][0] != 'E') {
                 map[locHeight][0] = 'E';
                 exitLoop++;
-                addToExits(0, locHeight);
+                addToExits(0, locHeight, card);
             }
             break;
         }
     }
 }
 
-void Maze::addToExits(int x, int y) {
+void Maze::addToExits(int x, int y, int card) {
     Vec2 v;
     v.x = x;
     v.y = y;
     exitCoords.emplace_back(v);
+
+    switch (card) {
+    case 0: setupPlayer(x, y+1); break;
+    case 1: setupPlayer(x-1, y); break;
+    case 2: setupPlayer(x, y-1); break;
+    case 3: setupPlayer(x+1, y); break;
+    }
 }
 
 void Maze::AStarSearches() {
@@ -304,4 +318,46 @@ int Maze::userInput(int min, int max) {
             return result;
         }
     }
+}
+
+void Maze::setupPlayer(int x, int y) {
+
+    int middleWidth = width / 2;
+    int middleHeight = height / 2;
+
+    Astar a;
+    vector<Path*> playerPath = a.AStarPath(middleWidth, middleHeight, x, y, map, width, height);
+
+    Player* p = new Player(playerPath, x, y);
+    players.emplace_back(p);
+
+}
+
+void Maze::movePlayer() {
+    
+    while (!allPlayersFinished()) {
+        for (auto& i : players) {
+            if (i->finished == false) {
+                Path* r = i->route[0];
+                if (map[r->pathY][r->pathX] != 'P') {
+                    map[i->y][i->x] = ' ';
+                    map[r->pathY][r->pathX] = map[r->pathY][r->pathX] != 'F' ? 'P' : 'F';
+                    i->y = r->pathY;
+                    i->x = r->pathX;
+                    i->route.erase(i->route.begin());
+                    i->finished = i->route.empty() ? true : false;
+                }
+
+                printMaze();
+            }
+        }
+    }
+}
+
+bool Maze::allPlayersFinished() {
+    for (auto& i : players) {
+        if (i->finished == false) return false;
+    }
+
+    return true;
 }

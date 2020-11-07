@@ -51,7 +51,7 @@ int main() {
         cout << "Maze loaded, press the number for what you would like to do?" << '\n'
             << "[1] Generate new Maze" << '\n' << "[2] Read Maze in from default file" << '\n'
             << "[3] Read maze in from custom file" << '\n' << "[4] Print Maze" << '\n'
-            << "[5] Show best route to all maze exits" << '\n' << "[6] Save maze to default file"
+            << "[5] Show best route from all maze enterances" << '\n' << "[6] Save maze to default file"
             << '\n' << "[7] Save maze to custom file" << '\n' << "[8] Exit" << '\n';
 
         cin >> choice;
@@ -92,6 +92,10 @@ int main() {
 
         case 8:
             exit = true;
+            break;
+
+        case 9:
+            m.movePlayer();
             break;
 
         default:

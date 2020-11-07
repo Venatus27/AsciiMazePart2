@@ -17,3 +17,8 @@ void Player::routeSafetyCheck() {
 	finished = route.empty() ? true : false;
 	locked = route.empty() ? 2 : 0;
 }
+
+void Player::addRoute(vector<Path*> r) {
+	route = r;
+	routeSafetyCheck();
+}

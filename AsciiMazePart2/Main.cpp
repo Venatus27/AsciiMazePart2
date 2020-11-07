@@ -12,6 +12,7 @@ int main() {
     srand((int)time(0));
     Maze m;
     int choice = 0;
+    int turns = 0;
     bool valid = false;
     string file;
 
@@ -95,7 +96,13 @@ int main() {
             break;
 
         case 9:
-            m.movePlayer();
+            m.movePlayerAll();
+            break;
+        
+        case 10:
+            cout << "please input the number of turns each player should run: ";
+            cin >> turns;
+            m.movePlayerLimit(turns);
             break;
 
         default:

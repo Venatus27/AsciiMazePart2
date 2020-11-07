@@ -14,7 +14,6 @@
 using namespace std;
 
 void Maze::printMaze() {
-    //printing
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
@@ -116,10 +115,18 @@ bool Maze::readMapFile(string file) {
 
         for (int i = 0; i < width; i++) {
             map[height].push_back(line.at(i));
+            if (line.at(i) == 'P') {
+                addToPlayers(i, height);
+                pausedMaze = true;
+            }
         }
 
         widthMade = true;
         height++;
+    }
+
+    for (auto& i : playerCoords) {
+        setupPlayer(i.x, i.y);
     }
 
     MyReadFile.close();
@@ -257,12 +264,21 @@ void Maze::addToExits(int x, int y, int card) {
     v.y = y;
     exitCoords.emplace_back(v);
 
-    switch (card) {
-    case 0: setupPlayer(x, y+1); break;
-    case 1: setupPlayer(x-1, y); break;
-    case 2: setupPlayer(x, y-1); break;
-    case 3: setupPlayer(x+1, y); break;
+    if (!pausedMaze) { //dont set up new players if it is a paused maze
+        switch (card) {
+        case 0: setupPlayer(x, y + 1); break;
+        case 1: setupPlayer(x - 1, y); break;
+        case 2: setupPlayer(x, y - 1); break;
+        case 3: setupPlayer(x + 1, y); break;
+        }
     }
+}
+
+void Maze::addToPlayers(int x, int y) {
+    Vec2 v;
+    v.x = x;
+    v.y = y;
+    playerCoords.emplace_back(v);
 }
 
 void Maze::AStarSearches() {
@@ -275,21 +291,20 @@ void Maze::AStarSearches() {
         vector<Path*> vp = a.AStarPath(exitCoords[i].x, exitCoords[i].y, middleWidth, middleHeight, map, width, height);
 
         int lastPlaceX = middleWidth;
-        char route = '-';
 
         for (auto& j : vp) {
-            map[j->pathY][j->pathX] = map[j->pathY][j->pathX] == 'E' ? 'E' : 'o';
+            map[j->pathY][j->pathX] = map[j->pathY][j->pathX] == ' ' ? 'o' : map[j->pathY][j->pathX];
         }
 
         cout << "route for exit coordinates (" << exitCoords[i].x << ',' << exitCoords[i].y << ')' << '\n';
         printMaze();
 
         lastPlaceX = middleWidth;
-        route = ' ';
 
         for (auto& j : vp) {
-            map[j->pathY][j->pathX] = map[j->pathY][j->pathX] == 'E' ? 'E' : route;
+            map[j->pathY][j->pathX] = map[j->pathY][j->pathX] == 'o' ? ' ' : map[j->pathY][j->pathX];
             lastPlaceX = j->pathX;
+            delete j;
         }
     }
 }
@@ -300,6 +315,11 @@ void Maze::clearMaze() {
     exits = 0;
     map.clear();
     exitCoords.clear();
+    for (auto& i : players) {
+        delete i;
+    }
+    players.clear();
+    pausedMaze = false;
 }
 
 //input handling
@@ -333,9 +353,57 @@ void Maze::setupPlayer(int x, int y) {
 
 }
 
-void Maze::movePlayer() {
+void Maze::resetPlayers() {
     
+    bool needsReset = true;
+    for (auto& i : players) {
+        needsReset = i->finished == false ? false : needsReset;
+    }
+
+    if (needsReset) {
+        int middleWidth = width / 2;
+        int middleHeight = height / 2;
+
+        for (auto& i : players) {
+            Astar a;
+            i->x = i->startX;
+            i->y = i->startY;
+            i->addRoute(a.AStarPath(middleWidth, middleHeight, i->startX, i->startY, map, width, height));
+        }
+    }
+}
+
+void Maze::movePlayerAll() {
+    resetPlayers();
     while (!allPlayersFinished() && !allPlayersDeadlocked()) {
+        playerMovement();
+    }
+
+    if (allPlayersDeadlocked()) {
+        cout << "The session was ended early as the maze became unsolvable for all remaining players" << '\n';
+    }
+
+    solvability();
+
+}
+
+void Maze::movePlayerLimit(int turns) {
+    resetPlayers();
+    int turnsTaken = 0;
+    while (!allPlayersFinished() && !allPlayersDeadlocked() && turns > turnsTaken) {
+        playerMovement();
+        turnsTaken++;
+    }
+
+    if (allPlayersDeadlocked()) {
+        cout << "The session was ended early as the maze became unsolvable for all remaining players" << '\n';
+    }
+
+    solvability();
+}
+
+void Maze::playerMovement() {
+    
         for (auto& i : players) {
             if (i->finished == false) {
                 Path* r = i->route[0];
@@ -356,13 +424,6 @@ void Maze::movePlayer() {
                 printMaze();
             }
         }
-    }
-
-    if (allPlayersDeadlocked()) {
-        cout << "The session was ended early as the maze became unsolvable for all remaining players" << '\n';
-    }
-
-    solvability();
 }
 
 bool Maze::allPlayersFinished() {
@@ -389,10 +450,10 @@ void Maze::solvability() {
         notFinished = i->locked >= 2 ? notFinished + 1 : notFinished;
     }
 
-    if (notFinished == 0) cout << "The maze was fully solvable by all players" << '\n'; 
+    if (notFinished == 0) cout << "The maze was fully solvable by all players" << '\n' << '\n';
 
-    else if (notFinished == players.size()) cout << "The maze was fully unsolvable by all players" << '\n';
+    else if (notFinished == players.size()) cout << "The maze was fully unsolvable by all players" << '\n' << '\n';
 
-    else cout << "the maze was partially solvable" << '\n';
+    else cout << "the maze was partially solvable" << '\n' << '\n';
 
 }

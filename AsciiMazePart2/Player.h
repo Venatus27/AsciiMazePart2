@@ -17,5 +17,6 @@ public:
 	Player(std::vector<Path*> route, int xStart, int yStart);
 
 	void routeSafetyCheck();
+	void addRoute(std::vector<Path*> r);
 };
 

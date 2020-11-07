@@ -335,7 +335,7 @@ void Maze::setupPlayer(int x, int y) {
 
 void Maze::movePlayer() {
     
-    while (!allPlayersFinished()) {
+    while (!allPlayersFinished() && !allPlayersDeadlocked()) {
         for (auto& i : players) {
             if (i->finished == false) {
                 Path* r = i->route[0];
@@ -346,12 +346,23 @@ void Maze::movePlayer() {
                     i->x = r->pathX;
                     i->route.erase(i->route.begin());
                     i->finished = i->route.empty() ? true : false;
+                    i->locked = 0;
+                }
+
+                else {
+                    i->locked++;
                 }
 
                 printMaze();
             }
         }
     }
+
+    if (allPlayersDeadlocked()) {
+        cout << "The session was ended early as the maze became unsolvable for all remaining players" << '\n';
+    }
+
+    solvability();
 }
 
 bool Maze::allPlayersFinished() {
@@ -360,4 +371,28 @@ bool Maze::allPlayersFinished() {
     }
 
     return true;
+}
+
+bool Maze::allPlayersDeadlocked() {
+    
+    for (auto& i : players) {
+        if (i->finished == false && i->locked < 2) return false;
+    } 
+
+    return true;
+}
+
+void Maze::solvability() {
+    
+    int notFinished = 0;
+    for (auto& i : players) {
+        notFinished = i->locked >= 2 ? notFinished + 1 : notFinished;
+    }
+
+    if (notFinished == 0) cout << "The maze was fully solvable by all players" << '\n'; 
+
+    else if (notFinished == players.size()) cout << "The maze was fully unsolvable by all players" << '\n';
+
+    else cout << "the maze was partially solvable" << '\n';
+
 }

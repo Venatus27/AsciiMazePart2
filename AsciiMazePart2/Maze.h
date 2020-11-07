@@ -33,5 +33,7 @@ public:
     void setupPlayer(int x, int y);
     void movePlayer();
     bool allPlayersFinished();
+    bool allPlayersDeadlocked();
+    void solvability();
 };
 

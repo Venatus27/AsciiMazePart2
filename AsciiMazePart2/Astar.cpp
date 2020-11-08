@@ -23,8 +23,8 @@ vector<Path*> Astar::AStarPath(int destinationX, int destinationY, int startX, i
 
         if (doesPathListContain(closedPathList, *destinationSquare))
         {
-            return buildPath(currentSquare);
             delete destinationSquare;
+            return buildPath(currentSquare);
             break;
         }
 
@@ -47,7 +47,10 @@ vector<Path*> Astar::AStarPath(int destinationX, int destinationY, int startX, i
                 adjacentSquares[i]->pathParent = currentSquare;
             }
         }
+
+        vector<Path*>().swap(adjacentSquares);
     }
 
+    free(currentSquare);
     return evaluationList; //bug fixed: empty, guards against null errors that occur on partially solvable solutions running multiple times
 }

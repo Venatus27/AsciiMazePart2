@@ -12,6 +12,7 @@ class Maze
 {
 public:
 
+    Astar a;
     int width;
     int height;
     int exits;

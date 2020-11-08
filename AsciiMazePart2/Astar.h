@@ -25,7 +25,8 @@ private:
 			if (current->pathParent != nullptr) bestPath.insert(bestPath.begin(), current);
 			else lastMove = current;
 		}
-
+		
+		free(current);
 		return bestPath;
 	};
 
@@ -77,6 +78,7 @@ private:
 				{
 					Path* newP = new Path(p->pathG + 1, BlocksToTarget(x, y, destinationX, destinationY), p, x, y);
 					ret.insert(ret.begin(), newP);
+
 				}
 
 			}

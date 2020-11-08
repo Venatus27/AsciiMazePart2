@@ -288,7 +288,6 @@ void Maze::AStarSearches() {
     int middleHeight = height / 2;
 
     for (int i = 0; i < exitCoords.size(); i++) {
-        Astar a;
         vector<Path*> vp = a.AStarPath(exitCoords[i].x, exitCoords[i].y, middleWidth, middleHeight, map, width, height);
 
         int lastPlaceX = middleWidth;
@@ -348,12 +347,10 @@ void Maze::setupPlayer(int x, int y) {
     int middleWidth = width / 2;
     int middleHeight = height / 2;
 
-    Astar a;
     vector<Path*> playerPath = a.AStarPath(middleWidth, middleHeight, x, y, map, width, height);
 
     Player* p = new Player(playerPath, x, y);
     players.emplace_back(p);
-
 }
 
 void Maze::resetPlayers() {
@@ -368,7 +365,6 @@ void Maze::resetPlayers() {
         int middleHeight = height / 2;
 
         for (auto& i : players) {
-            Astar a;
             i->x = i->startX;
             i->y = i->startY;
             i->addRoute(a.AStarPath(middleWidth, middleHeight, i->startX, i->startY, map, width, height));

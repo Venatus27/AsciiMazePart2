@@ -1,7 +1,3 @@
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-
 #include "Main.h"
 #include "Maze.h"
 #include <random>;
@@ -130,6 +126,4 @@ int main() {
             cout << "invalid number please try again" << '\n';
         }
     }
-
-    _CrtDumpMemoryLeaks();
 }

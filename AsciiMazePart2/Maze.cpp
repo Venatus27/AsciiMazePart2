@@ -313,12 +313,14 @@ void Maze::clearMaze() {
     width = 0;
     height = 0;
     exits = 0;
+
     map.clear();
     exitCoords.clear();
     for (auto& i : players) {
         delete i;
     }
     players.clear();
+    playerCoords.clear();
     pausedMaze = false;
 }
 
@@ -369,17 +371,23 @@ void Maze::resetPlayers() {
             i->x = i->startX;
             i->y = i->startY;
             i->addRoute(a.AStarPath(middleWidth, middleHeight, i->startX, i->startY, map, width, height));
+            i->movesTaken = 0;
         }
     }
 }
 
-void Maze::movePlayerAll() {
+void Maze::movePlayerAll(bool print) {
     resetPlayers();
     while (!allPlayersFinished() && !allPlayersDeadlocked()) {
-        playerMovement();
+        playerMovement(print);
     }
 
-    if (allPlayersDeadlocked()) {
+    bool endLock = false;
+    for (auto& i : players) {
+        endLock = i->locked < 2 ? endLock : true;
+    }
+
+    if (endLock) {
         cout << "The session was ended early as the maze became unsolvable for all remaining players" << '\n';
     }
 
@@ -391,7 +399,7 @@ void Maze::movePlayerLimit(int turns) {
     resetPlayers();
     int turnsTaken = 0;
     while (!allPlayersFinished() && !allPlayersDeadlocked() && turns > turnsTaken) {
-        playerMovement();
+        playerMovement(true);
         turnsTaken++;
     }
 
@@ -402,7 +410,7 @@ void Maze::movePlayerLimit(int turns) {
     solvability();
 }
 
-void Maze::playerMovement() {
+void Maze::playerMovement(bool print) {
     
         for (auto& i : players) {
             if (i->finished == false) {
@@ -421,7 +429,8 @@ void Maze::playerMovement() {
                     i->locked++;
                 }
 
-                printMaze();
+                i->movesTaken = i->movesTaken + 1;
+                if(print) printMaze();
             }
         }
 }
@@ -455,5 +464,74 @@ void Maze::solvability() {
     else if (notFinished == players.size()) cout << "The maze was fully unsolvable by all players" << '\n' << '\n';
 
     else cout << "the maze was partially solvable" << '\n' << '\n';
+
+}
+
+void Maze::multiRun() {
+
+    int movesTakenTotal = 0;
+    int widthHere;
+    int heightHere;
+    int exitsHere;
+
+    cout << "enter width for these 100 mazes (minimum 10, maximum: 30): ";
+    widthHere = userInput(10, 30);
+    cout << "enter height for these 100 mazes (minimum 10, maximum: 30): ";
+    heightHere = userInput(10, 30);
+    cout << "enter number of enterances for these 100 mazes (minimum 0, maximum: 10): ";
+    exitsHere = userInput(0, 10);
+
+    for (int i = 0; i < 100; i++) {
+        
+        clearMaze();
+
+        width = widthHere;
+        height = heightHere;
+        exits = exitsHere;
+
+        vector<vector<char>> build(height, vector<char>(width, 'X'));
+        map = build;
+
+        int middleWidth = width / 2;
+        int middleHeight = height / 2;
+
+        makeMaze(middleWidth, middleHeight);
+
+        //dealing with double outer walls that appear occassionally and prevent exits
+
+        for (int x = 1; x < width; x++) {
+            if (map[1][x] == 'X' && map[2][x] != 'X') map[1][x] = ' ';
+            if (map[height - 2][x] == 'X' && map[height - 3][x] != 'X') map[height - 2][x] = ' ';
+        }
+
+        for (int x = 1; x < height; x++) {
+            if (map[x][1] == 'X' && map[x][2] != 'X') map[x][1] = ' ';
+            if (map[x][width - 2] == 'X' && map[x][width - 3] != 'X') map[x][width - 2] = ' ';
+        }
+
+        //centre square 
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                map[middleHeight + x][middleWidth + y] = ' ';
+            }
+        }
+
+        makeNewExits();
+
+        for (auto& i : players) {
+            map[i->y][i->x] = 'P';
+        }
+
+        map[middleHeight][middleWidth] = 'F';
+
+        movePlayerAll(false);
+
+        for (auto& i : players) {
+            movesTakenTotal += i->movesTaken;
+        }
+    }
+
+    float aveMove = (float)movesTakenTotal / 100;
+    cout << "the average moves taken by a player to reach the end of the maze in this configuration is: " << aveMove << '\n' << '\n';
 
 }

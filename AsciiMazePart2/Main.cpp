@@ -1,3 +1,7 @@
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 #include "Main.h"
 #include "Maze.h"
 #include <random>;
@@ -19,7 +23,7 @@ int main() {
     while (valid == false) {
         cout << "No Maze loaded, press the number for what you would like to do?" << '\n'
             << "[1] Generate new Maze" << '\n' << "[2] Read Maze in from default file" << '\n'
-            << "[3] Read maze in from custom file" << '\n';
+            << "[3] Read maze in from custom file" << '\n' << "[4] Find ave. player moves from 100 maze configurations" << '\n';
 
         cin >> choice;
 
@@ -38,6 +42,10 @@ int main() {
             cout << "please input the file name to read (e.g. mapStore.txt): ";
             cin >> file;
             valid = m.readMapFile(file);
+            break;
+
+        case 4:
+            m.multiRun();
             break;
 
         default:
@@ -96,7 +104,7 @@ int main() {
             break;
 
         case 9:
-            m.movePlayerAll();
+            m.movePlayerAll(true);
             break;
         
         case 10:
@@ -105,8 +113,14 @@ int main() {
             m.movePlayerLimit(turns);
             break;
 
+        case 11:
+            m.multiRun();
+            break;
+
         default:
             cout << "invalid number please try again" << '\n';
         }
     }
+
+    _CrtDumpMemoryLeaks();
 }

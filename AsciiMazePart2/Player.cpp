@@ -11,6 +11,7 @@ Player::Player(vector<Path*> r, int xStart, int yStart) {
 	finished = false;
 	locked = 0;
 	routeSafetyCheck();
+	movesTaken = 0;
 }
 
 void Player::routeSafetyCheck() {

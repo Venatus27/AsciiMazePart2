@@ -13,6 +13,7 @@ public:
 	int startY;
 	bool finished;
 	int locked;
+	int movesTaken;
 
 	Player(std::vector<Path*> route, int xStart, int yStart);
 

@@ -35,11 +35,12 @@ public:
     int userInput(int min, int max);
     void setupPlayer(int x, int y);
     void resetPlayers();
-    void movePlayerAll();
+    void movePlayerAll(bool print);
     void movePlayerLimit(int turns);
-    void playerMovement();
+    void playerMovement(bool print);
     bool allPlayersFinished();
     bool allPlayersDeadlocked();
     void solvability();
+    void multiRun();
 };
 

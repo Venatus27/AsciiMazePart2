@@ -18,12 +18,14 @@ int main() {
     int choice = 0;
     int turns = 0;
     bool valid = false;
+    bool exit = false;
     string file;
 
     while (valid == false) {
         cout << "No Maze loaded, press the number for what you would like to do?" << '\n'
             << "[1] Generate new Maze" << '\n' << "[2] Read Maze in from default file" << '\n'
-            << "[3] Read maze in from custom file" << '\n' << "[4] Find ave. player moves from 100 maze configurations" << '\n';
+            << "[3] Read maze in from custom file" << '\n' << "[4] Find ave. player moves from 100 maze configurations (last instance will be loaded at end)" << '\n'
+            << "[5] Exit" << '\n';
 
         cin >> choice;
 
@@ -46,6 +48,12 @@ int main() {
 
         case 4:
             m.multiRun();
+            valid = true;
+            break;
+
+        case 5:
+            valid = true;
+            exit = true;
             break;
 
         default:
@@ -54,14 +62,15 @@ int main() {
 
     }
 
-    bool exit = false;
 
     while (exit == false) {
         cout << "Maze loaded, press the number for what you would like to do?" << '\n'
             << "[1] Generate new Maze" << '\n' << "[2] Read Maze in from default file" << '\n'
             << "[3] Read maze in from custom file" << '\n' << "[4] Print Maze" << '\n'
             << "[5] Show best route from all maze enterances" << '\n' << "[6] Save maze to default file"
-            << '\n' << "[7] Save maze to custom file" << '\n' << "[8] Exit" << '\n';
+            << '\n' << "[7] Save maze to custom file" << '\n' << "[8] Move all players to the finish line" << '\n'
+            << "[9] Move all players a certain number of moves" << '\n' << "[10] Find ave. player moves from 100 maze configurations (last instance will be loaded at end)" << '\n'
+            << "[11] Exit" << '\n';
 
         cin >> choice;
 
@@ -100,21 +109,21 @@ int main() {
             break;
 
         case 8:
-            exit = true;
-            break;
-
-        case 9:
             m.movePlayerAll(true);
             break;
         
-        case 10:
+        case 9:
             cout << "please input the number of turns each player should run: ";
             cin >> turns;
             m.movePlayerLimit(turns);
             break;
 
-        case 11:
+        case 10:
             m.multiRun();
+            break;
+        
+        case 11:
+            exit = true;
             break;
 
         default:

@@ -73,6 +73,7 @@ void Maze::makeMaze(int x, int y) {
             }
         }
     }
+
 }
 
 void Maze::writeMapFile(string file) {

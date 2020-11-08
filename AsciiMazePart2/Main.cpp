@@ -1,8 +1,8 @@
 #include "Main.h"
 #include "Maze.h"
-#include <random>;
-#include <chrono>;
-#include <iostream>;
+#include <random>
+#include <chrono>
+#include <iostream>
 
 using namespace std;
 

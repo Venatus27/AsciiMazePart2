@@ -2,13 +2,13 @@
 #include "Astar.h"
 #include "Path.h"
 #include "Player.h"
-#include <iostream>;
+#include <iostream>
 #include <fstream>
-#include <vector>;
-#include <random>;
-#include <ctime>;
-#include <chrono>;
-#include <string>;
+#include <vector>
+#include <random>
+#include <ctime>
+#include <chrono>
+#include <string>
 #include <sstream>
 
 using namespace std;
@@ -353,6 +353,7 @@ void Maze::setupPlayer(int x, int y) {
     players.emplace_back(p);
 }
 
+//resets players to original positions they were in when the maze was created/read in
 void Maze::resetPlayers() {
     
     bool needsReset = true;
@@ -432,6 +433,7 @@ void Maze::playerMovement(bool print) {
         }
 }
 
+//checks if all players are finished, cant use deadlock code for this job because of the condition changing when the maze ends
 bool Maze::allPlayersFinished() {
     for (auto& i : players) {
         if (i->finished == false) return false;

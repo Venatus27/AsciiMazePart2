@@ -14,6 +14,7 @@ Player::Player(vector<Path*> r, int xStart, int yStart) {
 	movesTaken = 0;
 }
 
+//safety checks ensure the code doesnt try to pull from empty lists
 void Player::routeSafetyCheck() {
 	finished = route.empty() ? true : false;
 	locked = route.empty() ? 2 : 0;

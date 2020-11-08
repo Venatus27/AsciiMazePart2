@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>;
-#include <fstream>;
+#include <vector>
+#include <fstream>
 #include "Player.h"
 
 struct Vec2 {

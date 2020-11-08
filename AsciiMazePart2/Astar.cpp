@@ -51,6 +51,5 @@ vector<Path*> Astar::AStarPath(int destinationX, int destinationY, int startX, i
         vector<Path*>().swap(adjacentSquares);
     }
 
-    free(currentSquare);
     return evaluationList; //bug fixed: empty, guards against null errors that occur on partially solvable solutions running multiple times
 }
